@@ -16,7 +16,7 @@
 //! [tree-sitter]: https://tree-sitter.github.io/
 
 use tree_sitter::Language;
-
+pub mod generate;
 extern "C" {
     fn tree_sitter_rome_ir() -> Language;
 }
@@ -50,5 +50,6 @@ mod tests {
         parser
             .set_language(super::language())
             .expect("Error loading YOUR_LANGUAGE_NAME language");
+        // parser.parse
     }
 }
