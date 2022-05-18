@@ -1,7 +1,9 @@
 use tree_sitter_rome_ir::generate::generate;
 fn main() {
     let mut parser = tree_sitter::Parser::new();
-    parser.set_language(tree_sitter_rome_ir::language()).unwrap();
+    parser
+        .set_language(tree_sitter_rome_ir::language())
+        .unwrap();
     let source = r#"
     List [
     HardGroup(
@@ -49,5 +51,6 @@ fn main() {
     
     "#;
     let tree = parser.parse(source, None).unwrap();
-    println!("{}", generate(tree, source));;
+    println!("{}", generate(tree, source));
+
 }
