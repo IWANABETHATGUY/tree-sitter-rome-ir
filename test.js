@@ -54,7 +54,7 @@ List [
   parser.setLanguage(Lang);
   const tree = parser.parse(source, null);
   // console.log(tree.rootNode.namedChild(0).namedChild(0).text);
-  console.log(generate(tree, source))
+  console.log(generate(tree, source));
 })();
 
 /**
@@ -67,15 +67,30 @@ function generate(tree, source) {
   // get first node of root
   let firstChild = node.namedChild(0);
   let kind = firstChild.type;
+  let formatElement = "";
   if (kind === "list") {
-    return generateList(firstChild, source);
+    formatElement = generateList(firstChild, source);
   } else if (kind === "call") {
-    
+    formatElement = generateCall(firstChild, source);
   } else if (kind === "ident") {
-    return;
+    formatElement = generateIdent(firstChild.text);
   } else {
     throw new Error(kind);
   }
+  const finalSource = `
+fn main() {
+    use rome_formatter::prelude::*;
+    use rome_formatter::Formatted;
+    let element = ${formatElement};
+    println!(
+        "{}",
+        Formatted::new(element, PrinterOptions::default())
+            .print()
+            .as_code()
+    );
+}
+  `;
+  return finalSource;
 }
 /**
  * @param{Parser.SyntaxNode} node
@@ -150,7 +165,8 @@ function generateCall(node, source) {
       break;
     }
     case "string_literal": {
-      generatedArgument = arg.text;
+      generatedArgument = JSON.stringify(arg.text.slice(1, -1));
+      // console.log()
       break;
     }
     default:
@@ -159,36 +175,6 @@ function generateCall(node, source) {
   return `${callName}(${generatedArgument})`;
 }
 
-// fn generate_call(node: Node, source: &str) -> String {
-//     // get callExpression name, and the name node must be a ident
-
-//     // handle some special case
-//     let node_content = get_content_of_node(node, source);
-//     match node_content.as_str() {
-//         "Line(Soft)" => return "soft_line_break()".to_string(),
-//         "Line(Hard)" => return "hard_line_break()".to_string(),
-//         _ => {}
-//     };
-
-//     let name = node.named_child(0).unwrap();
-//     let name = get_content_of_node(name, source);
-//     let call_name = generate_call_name(name);
-
-//     let argument = node.named_child(1).unwrap();
-//     let generated_argument = match argument.kind() {
-//         "list" => generate_list(argument, source),
-//         "call" => generate_call(argument, source),
-//         "ident" => generate_ident(get_content_of_node(argument, source)),
-//         "string_literal" => {
-//             let raw_string = get_content_of_node(argument, source);
-//             raw_string
-//         }
-//         _ => {
-//             unreachable!("{}", argument.kind())
-//         } // $.list, $.call, $.ident, $.string_literal
-//     };
-//     format!("{}({})", call_name, generated_argument)
-// }
 
 /**
  *
